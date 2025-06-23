@@ -63,6 +63,8 @@
         const myId = self.crypto.randomUUID().substr(0, 8)
 
         // ランダム色をIDごとに固定
+        const idColorMap = {}
+
         function getColorForId(id) {
           if (!idColorMap[id]) {
             const hue = Math.floor(Math.random() * 360)
