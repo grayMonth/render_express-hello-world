@@ -153,7 +153,7 @@
             const isMe = id === myId
             const color = getColorForId(id)
             const timestamp = getTimeString()
-            li.textContent = `(${id})${isMe ? '自分' : ''}[${timestamp}]: ${text}`
+            li.textContent = `${id}${isMe ? '（自分）' : ''}[${timestamp}]:`+ text
             li.style.color = color
             messageList.appendChild(li)
             messageList.scrollTop = messageList.scrollHeight
