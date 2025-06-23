@@ -16,6 +16,9 @@
         list-style: none;
         padding: 0;
         margin: 0;
+        background-color: #f5f5f5;
+        border: 1px solid #ccc;
+        font-family: sans-serif;
       }
       .form {
         display: flex;
@@ -30,6 +33,11 @@
         border: 1px solid #ccc;
         background: #eee;
         cursor: pointer;
+      }
+      .messages li {
+        margin-bottom: 5px;
+        padding: 5px;
+        border-radius: 5px;
       }
     </style>
   </head>
@@ -53,6 +61,21 @@
         const host = location.origin.replace(/^http/, 'ws')
         const ws = new WebSocket(host + '/ws')
         const myId = self.crypto.randomUUID().substr(0, 8)
+
+        // ランダム色をIDごとに固定
+        function getColorForId(id) {
+          if (!idColorMap[id]) {
+            const hue = Math.floor(Math.random() * 360)
+            idColorMap[id] = `hsl(${hue}, 70%, 40%)`
+          }
+          return idColorMap[id]
+        }
+
+        // チャットの送信時間
+        function getTimeString() {
+          const now = new Date()
+          return now.toTimeString().split(' ')[0]
+        }
 
         const canvas = document.getElementById('canvas')
         const ctx = canvas.getContext('2d')
@@ -122,26 +145,29 @@
               mouseout()
             }
           }
+
           if (msg.type === 'chat') {
             const { id, text } = msg
             const messageList = document.querySelector('.messages')
             const li = document.createElement('li')
-            if (id === myId) {
-              li.textContent = `(${id})自分:` + text
-            } else {
-              li.textContent = id + ': ' + text
-            }
+            const isMe = id === myId
+            const color = getColorForId(id)
+            const timestamp = getTimeString()
+            li.textContent = `(${id})${isMe ? '自分' : ''}[${timestamp}]: ${text}`
+            li.style.color = color
             messageList.appendChild(li)
+            messageList.scrollTop = messageList.scrollHeight
           }
         }
 
         const form = document.querySelector('.form')
-
         form.onsubmit = function (e) {
           e.preventDefault()
           const input = document.querySelector('.input')
           const text = input.value
-          ws.send(JSON.stringify({ id: myId, text, type: 'chat' }))
+          if (text.trim()) {
+            ws.send(JSON.stringify({ id: myId, text, type: 'chat' }))
+          }
           input.value = ''
           input.focus()
         }
